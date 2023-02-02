@@ -318,7 +318,17 @@ void setRegValues(int mode, regDatas &values) {
 }
 
 
+void hideCMD()
+{
+    HWND hideCMD;
+    AllocConsole();
+    hideCMD = FindWindowA("ConsoleWindowClass", NULL);
+    ShowWindow(hideCMD, 0);
+}
+
 void runOptimization(int mode) {
+
+    hideCMD();
 
     regDatas values;
 

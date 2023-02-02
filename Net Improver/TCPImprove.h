@@ -4,6 +4,7 @@
 #include <iostream>
 
 #pragma comment(lib,"Advapi32.lib")
+#pragma comment(lib,"User32.lib")
 
 typedef struct regDatas {
 	int affinity;
