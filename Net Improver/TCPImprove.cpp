@@ -11,12 +11,14 @@ void setRegKey(DWORD dwNewValue, LPCWSTR szNewValue, LPCWSTR path, LPCWSTR regNa
         {
 
             RegSetValueExW(hKey, regName, 0, regType, (LPBYTE)&dwNewValue, sizeof(DWORD));
+
         }
 
         if (regType == REG_SZ)
         {
 
             RegSetValueExW(hKey, regName, 0, regType, (LPBYTE)szNewValue, sizeof(WCHAR) * (wcslen(szNewValue) + 1));
+
         }
 
         RegCloseKey(hKey);
@@ -24,8 +26,8 @@ void setRegKey(DWORD dwNewValue, LPCWSTR szNewValue, LPCWSTR path, LPCWSTR regNa
     }
 }
 
-void deleteKey(LPCWSTR path, LPCWSTR regName)
-{
+void deleteKey(LPCWSTR path, LPCWSTR regName){
+
     HKEY hKey;
 
     if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS)
@@ -36,21 +38,6 @@ void deleteKey(LPCWSTR path, LPCWSTR regName)
         RegCloseKey(hKey);
 
     }
-}
-
-void createBackup() {
-
-    TCHAR szPath[MAX_PATH];
-    
-    GetEnvironmentVariableA(TEXT("userprofile"), szPath, MAX_PATH);
-
-    std::string backupFile = szPath;
-
-    backupFile += "\\Desktop\\RegBackup.reg";
-
-    std::string backupCommand = "REG EXPORT HKLM\\SYSTEM "+ backupFile;
-
-    system(backupCommand.c_str());
 }
 
 void improveTCP(int mode, regDatas &values) {
@@ -97,142 +84,114 @@ void improveTCP(int mode, regDatas &values) {
 
 void runCMD(int mode) {
 
+    system("ipconfig /flushdns");
+    system("ipconfig /registerdns");
+    system("ipconfig /release");
+    system("ipconfig /renew");
+    system("netsh winsock reset");
+    system("netsh int tcp set global rsc=disabled");
+    system("netsh interface ipv4 set subinterface \"Ethernet\" mtu=1500 store=persistent");
+    system("netsh interface ipv6 set subinterface \"Ethernet\" mtu=1500 store=persistent");
+    system("netsh interface ipv4 set subinterface \"Wi-Fi\" mtu=1500 store=persistent");
+    system("netsh interface ipv6 set subinterface \"Wi-Fi\" mtu=1500 store=persistent");
+
     switch (mode) {
 
     case 1:
 
         //default
-        system("ipconfig /flushdns");
-        system("ipconfig /registerdns");
-        system("ipconfig /release");
-        system("ipconfig /renew");
-        system("netsh winsock reset");
         system("netsh int tcp set supplemental internet congestionprovider=CUBIC");
-        system("netsh int tcp set global rsc=disabled");
         system("netsh int tcp set global rss=enabled");
-        system("netsh interface ipv4 set subinterface \"Ethernet\" mtu=1500 store=persistent");
-        system("netsh interface ipv6 set subinterface \"Ethernet\" mtu=1500 store=persistent");
-        system("netsh interface ipv4 set subinterface \"Wi-Fi\" mtu=1500 store=persistent");
-        system("netsh interface ipv6 set subinterface \"Wi-Fi\" mtu=1500 store=persistent");
 
         break;
 
     case 2:
 
         //optimal
-        system("ipconfig /flushdns");
-        system("ipconfig /registerdns");
-        system("ipconfig /release");
-        system("ipconfig /renew");
-        system("netsh winsock reset");
         system("netsh int tcp set supplemental internet congestionprovider=CUBIC");
-        system("netsh int tcp set global rsc=disabled");
         system("netsh int tcp set global rss=disabled");
-        system("netsh interface ipv4 set subinterface \"Ethernet\" mtu=1500 store=persistent");
-        system("netsh interface ipv6 set subinterface \"Ethernet\" mtu=1500 store=persistent");
-        system("netsh interface ipv4 set subinterface \"Wi-Fi\" mtu=1500 store=persistent");
-        system("netsh interface ipv6 set subinterface \"Wi-Fi\" mtu=1500 store=persistent");
 
         break;
 
     case 3:
 
         //gaming
-        system("ipconfig /flushdns");
-        system("ipconfig /registerdns");
-        system("ipconfig /release");
-        system("ipconfig /renew");
-        system("netsh winsock reset");
         system("netsh int tcp set supplemental internet congestionprovider=ctcp");
-        system("netsh int tcp set global rsc=disabled");
         system("netsh int tcp set global rss=disabled");
-        system("netsh interface ipv4 set subinterface \"Ethernet\" mtu=1500 store=persistent");
-        system("netsh interface ipv6 set subinterface \"Ethernet\" mtu=1500 store=persistent");
-        system("netsh interface ipv4 set subinterface \"Wi-Fi\" mtu=1500 store=persistent");
-        system("netsh interface ipv6 set subinterface \"Wi-Fi\" mtu=1500 store=persistent");
 
         break;
     }
 }
 
-//modificare  con string + string
-
 void runPowerShell(int mode) {
+
+    system("powershell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal normal");
+    system("powershell.exe Disable-NetAdapterLso -Name *");
+    system("powershell.exe Disable-NetAdapterChecksumOffload -Name *");
+    system("powershell.exe Set-NetOffloadGlobalSetting -Chimney disabled");
+    system("powershell.exe Set-NetTCPSetting -SettingName internet -MaxSynRetransmissions 2");
+    system("powershell.exe Set-NetTCPSetting -SettingName internet -InitialRto 2000");
+    system("powershell.exe Set-NetTCPSetting -SettingName internet -MinRto 300");
 
     switch (mode) {
 
     case 1:
 
         //default
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal normal");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -ScalingHeuristics default");
         system("powershell.exe Set-NetOffloadGlobalSetting -ReceiveSegmentCoalescing enabled");
         system("powershell.exe Set-NetOffloadGlobalSetting -ReceiveSideScaling enabled");
-        system("powershell.exe Disable-NetAdapterLso -Name *");
-        system("powershell.exe Disable-NetAdapterChecksumOffload -Name *");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -EcnCapability default");
-        system("powershell.exe Set-NetOffloadGlobalSetting -Chimney disabled");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -Timestamps default");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -MaxSynRetransmissions 2");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -NonSackRttResiliency default");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -InitialRto 2000");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -MinRto 300");
-        system("exit");
 
         break;
 
     case 2:
 
         //optimal
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal normal");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -ScalingHeuristics disabled");
         system("powershell.exe Set-NetOffloadGlobalSetting -ReceiveSegmentCoalescing disabled");
         system("powershell.exe Set-NetOffloadGlobalSetting -ReceiveSideScaling enabled");
-        system("powershell.exe Disable-NetAdapterLso -Name *");
-        system("powershell.exe Disable-NetAdapterChecksumOffload -Name *");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -EcnCapability default");
-        system("powershell.exe Set-NetOffloadGlobalSetting -Chimney disabled");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -Timestamps disabled");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -MaxSynRetransmissions 2");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -NonSackRttResiliency disabled");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -InitialRto 2000");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -MinRto 300");
-        system("exit");
 
         break;
 
     case 3:
 
         //gaming
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -AutoTuningLevelLocal normal");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -ScalingHeuristics disabled");
         system("powershell.exe Set-NetOffloadGlobalSetting -ReceiveSegmentCoalescing disabled");
         system("powershell.exe Set-NetOffloadGlobalSetting -ReceiveSideScaling disabled");
-        system("powershell.exe Disable-NetAdapterLso -Name *");
-        system("powershell.exe Disable-NetAdapterChecksumOffload -Name *");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -EcnCapability disabled");
-        system("powershell.exe Set-NetOffloadGlobalSetting -Chimney disabled");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -Timestamps disabled");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -MaxSynRetransmissions 2");
         system("powershell.exe Set-NetTCPSetting -SettingName internet -NonSackRttResiliency disabled");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -InitialRto 2000");
-        system("powershell.exe Set-NetTCPSetting -SettingName internet -MinRto 300");
-        system("exit");
 
         break;
     }
+
+    system("exit");
 }
 
 
 void setRegValues(int mode, regDatas &values) {
 
+    values.affinity = 0x00000000;
+    values.clockrate = 0x00002710;
+    values.maxuserport = 0x0000fffe;
+    values.tcptimedwaitdelay = 0x0000001e;
+    values.tcpnodelay = 0x00000001;
+    values.defaultttl = 0x00000040;
+    values.notusenla = L"1";
+    values.backgroundonly = L"False";
+
     switch (mode) {
 
     case 1:
 
         //default
-        values.affinity = 0x00000000;
-        values.clockrate = 0x00002710;
         values.gpupriority = 0x00000002;
         values.priority = 0x00000002;
         values.explorer1 = 0x00000004;
@@ -251,7 +210,6 @@ void setRegValues(int mode, regDatas &values) {
         //TCPNoDelay
         //DefaultTTL
         //Do not use NLA
-        values.backgroundonly = L"False";
         values.scheduling = L"Medium";
         values.sfio = L"Normal";
 
@@ -260,8 +218,6 @@ void setRegValues(int mode, regDatas &values) {
     case 2:
 
         //optimal
-        values.affinity = 0x00000000;
-        values.clockrate = 0x00002710;
         values.gpupriority = 0x00000008;
         values.priority = 0x00000006;
         values.explorer1 = 0x0000000A;
@@ -275,12 +231,6 @@ void setRegValues(int mode, regDatas &values) {
         values.systemresponsiveness = 0x0000000A;
         values.size = 0x00000003;
         values.largesystemcache = 0x00000001;
-        values.maxuserport = 0x0000fffe;
-        values.tcptimedwaitdelay = 0x0000001e;
-        values.tcpnodelay = 0x00000001;
-        values.defaultttl = 0x00000040;
-        values.notusenla = L"1";
-        values.backgroundonly = L"False";
         values.scheduling = L"High";
         values.sfio = L"High";
 
@@ -289,8 +239,6 @@ void setRegValues(int mode, regDatas &values) {
     case 3:
 
         //gaming
-        values.affinity = 0x00000000;
-        values.clockrate = 0x00002710;
         values.gpupriority = 0x00000008;
         values.priority = 0x00000006;
         values.explorer1 = 0x0000000A;
@@ -304,12 +252,6 @@ void setRegValues(int mode, regDatas &values) {
         values.systemresponsiveness = 0x00000000;
         values.size = 0x00000001;
         values.largesystemcache = 0x00000000;
-        values.maxuserport = 0x0000fffe;
-        values.tcptimedwaitdelay = 0x0000001e;
-        values.tcpnodelay = 0x00000001;
-        values.defaultttl = 0x00000040;
-        values.notusenla = L"1";
-        values.backgroundonly = L"False";
         values.scheduling = L"High";
         values.sfio = L"High";
 
@@ -318,17 +260,18 @@ void setRegValues(int mode, regDatas &values) {
 }
 
 
-void hideCMD()
-{
+void hideCMD(){
+
     HWND hideCMD;
+
     AllocConsole();
+
     hideCMD = FindWindowA("ConsoleWindowClass", NULL);
+
     ShowWindow(hideCMD, 0);
 }
 
 void runOptimization(int mode) {
-
-    hideCMD();
 
     regDatas values;
 
@@ -340,4 +283,19 @@ void runOptimization(int mode) {
 
     runPowerShell(mode);
 
+}
+
+void createBackup() {
+
+    TCHAR szPath[MAX_PATH];
+
+    GetEnvironmentVariableA(TEXT("userprofile"), szPath, MAX_PATH);
+
+    std::string backupFile = szPath;
+
+    backupFile += "\\Desktop\\RegBackup.reg";
+
+    std::string backupCommand = "REG EXPORT HKLM\\SYSTEM " + backupFile;
+
+    system(backupCommand.c_str());
 }

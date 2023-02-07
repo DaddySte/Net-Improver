@@ -32,6 +32,10 @@ typedef struct regDatas {
 	LPCWSTR sfio;
 };
 
+void hideCMD();
+
+void setRegValues(int mode, regDatas &values);
+
 void runOptimization(int mode);
 
 void createBackup();
