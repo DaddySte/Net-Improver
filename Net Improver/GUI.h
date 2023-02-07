@@ -310,7 +310,7 @@ namespace NetImprover {
 
 	private: System::Void ShowTweaks_Click(System::Object^ sender, System::EventArgs^ e) {
 
-		system("start https://github.com/DaddySte/Net-Improver-Core");
+		system("start https://github.com/DaddySte/Net-Improver");
 
 	}
 
